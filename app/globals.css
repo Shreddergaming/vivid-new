@@ -1,0 +1,76 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --foreground-rgb: 0, 0, 0;
+  --background-start-rgb: 214, 219, 220;
+  --background-end-rgb: 255, 255, 255;
+}
+
+body {
+  color: rgb(var(--foreground-rgb));
+  background: white;
+}
+
+/* Remove default focus outlines */
+* {
+  outline: none !important;
+}
+
+/* Custom button styles */
+@layer components {
+  .btn-primary {
+    @apply bg-purple-500 hover:bg-purple-600 text-white px-4 py-2 rounded-lg transition-colors;
+  }
+}
+
+.calendar-container .rdp {
+  --rdp-cell-size: 40px !important;
+  margin: 0;
+}
+
+.calendar-container .rdp-months {
+  width: 100%;
+}
+
+.calendar-container .rdp-month {
+  width: 100%;
+}
+
+.calendar-container .rdp-table {
+  width: 100%;
+  max-width: none;
+}
+
+/* Remove button outlines */
+@layer base {
+  button:focus {
+    @apply outline-none shadow-none;
+  }
+
+  input:focus {
+    @apply outline-none shadow-none;
+  }
+}
+
+.day-range-start:not(.day-range-end),
+.day-range-end:not(.day-range-start) {
+  &[aria-selected="true"] {
+    @apply bg-purple-500 text-white hover:bg-purple-600;
+  }
+}
+
+.day-range-start:not(.day-range-end) {
+  @apply rounded-l-md;
+}
+
+.day-range-end:not(.day-range-start) {
+  @apply rounded-r-md;
+}
+
+.day-range-middle {
+  &[aria-selected="true"] {
+    @apply bg-purple-100 text-purple-900;
+  }
+}

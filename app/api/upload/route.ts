@@ -1,0 +1,46 @@
+import { NextResponse } from 'next/server'
+import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3'
+import { getServerSession } from 'next-auth'
+
+const s3Client = new S3Client({
+    region: process.env.AWS_REGION!,
+    credentials: {
+        accessKeyId: process.env.AWS_ACCESS_KEY_ID!,
+        secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY!,
+    },
+})
+
+export async function POST(request: Request) {
+    try {
+        const session = await getServerSession()
+        if (!session?.user?.email) {
+            return new NextResponse('Unauthorized', { status: 401 })
+        }
+
+        const formData = await request.formData()
+        const file = formData.get('file') as File
+        if (!file) {
+            return new NextResponse('No file provided', { status: 400 })
+        }
+
+        const bytes = await file.arrayBuffer()
+        const buffer = Buffer.from(bytes)
+        const fileKey = `${session.user.id}/${Date.now()}-${file.name}`
+
+        await s3Client.send(
+            new PutObjectCommand({
+                Bucket: process.env.AWS_BUCKET_NAME,
+                Key: fileKey,
+                Body: buffer,
+                ContentType: file.type,
+                ACL: 'public-read',
+            })
+        )
+
+        const url = `https://${process.env.AWS_BUCKET_NAME}.s3.${process.env.AWS_REGION}.amazonaws.com/${fileKey}`
+        return NextResponse.json({ url })
+    } catch (error) {
+        console.error('Error uploading file:', error)
+        return new NextResponse('Error uploading file', { status: 500 })
+    }
+}
